@@ -1,23 +1,21 @@
 from django.db import models
-
-# Create your models here.
-# ... Imports Section ... #
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-# ....................... #
 from django.contrib.auth.models import BaseUserManager
+
+# Create your models here.
 
 class UserProfileManager(BaseUserManager):
     """Helps Django work with our custom user model."""
 
     def create_user(self, email, name, password=None):
-        """Creates a new user profile."""
+        """Creates a new user profile object."""
 
         if not email:
             raise ValueError('Users must have an email address.')
 
         email = self.normalize_email(email)
-        user = self.model(email=email, name=name,)
+        user = self.model(email=email, name=name)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -31,16 +29,14 @@ class UserProfileManager(BaseUserManager):
 
         user.is_superuser = True
         user.is_staff = True
+
         user.save(using=self._db)
 
         return user
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
-    """
-    Represents a "user profile" inside out system. Stores all user account
-    related data, such as 'email address' and 'name'.
-    """
+    """Respents a "user profile" inside our system."""
 
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
@@ -53,16 +49,29 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['name']
 
     def get_full_name(self):
-        """Django uses this when it needs to get the user's full name."""
+        """Used to get a users full name."""
 
         return self.name
 
     def get_short_name(self):
-        """Django uses this when it needs to get the users abbreviated name."""
+        """Used to get a users short name."""
 
         return self.name
 
     def __str__(self):
-        """Django uses this when it needs to convert the object to text."""
+        """Django uses this when it needs to convert the object to a string"""
 
         return self.email
+
+
+class ProfileFeedItem(models.Model):
+    """Profile status update."""
+
+    user_profile = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    status_text = models.CharField(max_length=255)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        """Return the model as a string."""
+
+        return self.status_text
