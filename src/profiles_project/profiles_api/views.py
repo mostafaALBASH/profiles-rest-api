@@ -9,6 +9,9 @@ from rest_framework import filters
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework.authtoken.models import Token
 
 from . import serializers
 from . import models
@@ -61,7 +64,6 @@ class HelloApiView(APIView):
 
         return Response({'method': 'delete'})
 
-
 class HelloViewSet(viewsets.ViewSet):
     """Test API ViewSet."""
 
@@ -73,7 +75,7 @@ class HelloViewSet(viewsets.ViewSet):
         a_viewset = [
             'Uses actions (list, create, retrieve, update, partial_update)',
             'Automatically maps to URLs using Routers',
-            'Provides more functionality with less code.2'
+            'Provides more functionality with less code. TEST'
         ]
 
         return Response({'message': 'Hello!', 'a_viewset': a_viewset})
@@ -111,7 +113,6 @@ class HelloViewSet(viewsets.ViewSet):
 
         return Response({'http_method': 'DELETE'})
 
-
 class UserProfileViewSet(viewsets.ModelViewSet):
     """Handles creating, creating and updating profiles."""
 
@@ -122,17 +123,17 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'email',)
 
-
 class LoginViewSet(viewsets.ViewSet):
     """Checks email and password and returns an auth token."""
+    # basic login but didn't use it
 
     serializer_class = AuthTokenSerializer
 
     def create(self, request):
         """Use the ObtainAuthToken APIView to validate and create a token."""
+        print(request.META)
 
         return ObtainAuthToken().post(request)
-
 
 class UserProfileFeedViewSet(viewsets.ModelViewSet):
     """Handles creating, reading and updating profile feed items."""
@@ -146,3 +147,55 @@ class UserProfileFeedViewSet(viewsets.ModelViewSet):
         """Sets the user profile to the logged in user."""
 
         serializer.save(user_profile=self.request.user)
+
+class IsAuthenticated(APIView):
+    # this gonna be used for routes in react to just check if user is authorized to access specific screen or no
+    """Test API View."""
+
+    # serializer_class = serializers.HelloSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        """Returns a list of APIView features."""
+        # print(request.META)
+
+        return Response({'detail': "Authenticated"})
+
+class CustomAuthToken(ObtainAuthToken):
+    # custom login I needed to retriteve the user details with token for react client which we will get through later
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+            'name': user.name,
+            'is_staff': user.is_staff,
+            'is_active': user.is_active
+        })
+
+# class CustomObtainAuthToken(ObtainAuthToken):
+#     def post(self, request, *args, **kwargs):
+#         response = super(CustomObtainAuthToken, self).post(request, *args, **kwargs)
+#         token = Token.objects.get(key=response.data['token'])
+#         return Response({'token': token.key, 'id': token.user_id})
+
+# class IsAuthenticated(viewsets.ModelViewSet):
+#     """Handles creating, creating and updating profiles."""
+#     # a_viewset = [
+#     #         'Uses actions (list, create, retrieve, update, partial_update)',
+#     #         'Automatically maps to URLs using Routers',
+#     #         'Provides more functionality with less code. TEST'
+#     #     ]
+    
+#     serializer_class = serializers.UserProfileSerializer
+#     queryset = [{'get': 'list'}]
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#     http_method_names = ['get']
+
