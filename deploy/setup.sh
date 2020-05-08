@@ -13,12 +13,17 @@ apt-get install -y python3-dev python3-venv sqlite python-pip supervisor nginx g
 
 # Create project directory
 mkdir -p $PROJECT_BASE_PATH
+echo "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy4444"
+
 git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH
+echo "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy3333331"
 
 # Create virtual environment
 mkdir -p $PROJECT_BASE_PATH/env
-python3 -m venv $PROJECT_BASE_PATH/env
+echo "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy222"
 
+python3 -m venv $PROJECT_BASE_PATH/env
+echo "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy111"
 # Install python packages
 $PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt
 $PROJECT_BASE_PATH/env/bin/pip install uwsgi==2.0.18
